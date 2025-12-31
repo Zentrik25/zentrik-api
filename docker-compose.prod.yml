@@ -1,6 +1,8 @@
 version: '3.8'
+
 # Production-ready Docker Compose configuration
 # This version removes development conveniences and adds production features
+
 services:
   # PostgreSQL database service
   db:
@@ -32,6 +34,7 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
+
   # FastAPI application service
   api:
     build:
@@ -75,6 +78,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
   # Nginx reverse proxy (optional but recommended)
   nginx:
     image: nginx:alpine
@@ -90,9 +94,11 @@ services:
     networks:
       - booking_network_prod
     restart: always
+
 volumes:
   postgres_data_prod:
     driver: local
+
 networks:
   booking_network_prod:
     driver: bridge

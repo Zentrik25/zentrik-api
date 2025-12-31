@@ -1,6 +1,8 @@
 version: '3.8'
+
 # Multi-container application setup
 # This file defines and runs both the database and the API
+
 services:
   # PostgreSQL database service
   db:
@@ -23,6 +25,7 @@ services:
       retries: 5
     networks:
       - booking_network
+
   # FastAPI application service
   api:
     build:
@@ -47,10 +50,12 @@ services:
     networks:
       - booking_network
     restart: unless-stopped  # Auto-restart if crashes
+
 # Named volumes for data persistence
 volumes:
   postgres_data:
     driver: local
+
 # Custom network for service communication
 networks:
   booking_network:
