@@ -1,62 +1,46 @@
-version: '3.8'
-
-# Multi-container application setup
-# This file defines and runs both the database and the API
-
 services:
-  # PostgreSQL database service
   db:
-    image: postgres:15-alpine  # Alpine = smaller, faster
+    image: postgres:15-alpine
     container_name: booking_db
     environment:
-      POSTGRES_USER: booking_user
-      POSTGRES_PASSWORD: booking_pass
-      POSTGRES_DB: booking_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"  # Expose to host machine for development
+      - "5432:5432"
     volumes:
-      # Persist database data even when container stops
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      # Check if database is ready to accept connections
-      test: ["CMD-SHELL", "pg_isready -U booking_user"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - booking_network
 
-  # FastAPI application service
   api:
     build:
-      context: .  # Build from current directory
+      context: .
       dockerfile: Dockerfile
     container_name: booking_api
     environment:
-      # Database connection URL for Docker network
-      # Uses service name 'db' instead of 'localhost'
-      DATABASE_URL: postgresql://booking_user:booking_pass@db:5432/booking_db
-      API_PORT: 8000
+      DATABASE_URL: ${DATABASE_URL}
       API_HOST: 0.0.0.0
+      API_PORT: 8000
     ports:
-      - "8000:8000"  # Expose API to host machine
+      - "8000:8000"
     depends_on:
       db:
-        condition: service_healthy  # Wait for database to be healthy
+        condition: service_healthy
     volumes:
-      # Mount code for development (hot reload)
-      # Remove this in production!
       - ./app:/app/app
     networks:
       - booking_network
-    restart: unless-stopped  # Auto-restart if crashes
+    restart: unless-stopped
 
-# Named volumes for data persistence
 volumes:
   postgres_data:
-    driver: local
 
-# Custom network for service communication
 networks:
   booking_network:
     driver: bridge
